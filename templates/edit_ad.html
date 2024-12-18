@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Редактирование объявления{% endblock %}
+
+{% block content %}
+    <h2>Редактирование объявления</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="title">Заголовок:</label>
+        <input type="text" id="title" name="title" value="{{ ad.title }}" required>
+        
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" required>{{ ad.description }}</textarea>
+        
+        <label for="photo">Фото (опционально):</label>
+        <input type="file" id="photo" name="photo">
+        
+        <button type="submit">Сохранить изменения</button>
+    </form>
+    <a href="{{ url_for('home') }}">Назад</a>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ad.title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ ad.title }}</h2>
+    <p>{{ ad.description }}</p>
+
+    {% if ad.photo %}
+        <h3>Фото объявления:</h3>
+        <img src="{{ url_for('static', filename='uploads/' + ad.photo) }}" alt="Фото объявления" width="400">
+    {% endif %}
+    
+    <br>
+    <a href="{{ url_for('home') }}">Назад</a>
+{% endblock %}

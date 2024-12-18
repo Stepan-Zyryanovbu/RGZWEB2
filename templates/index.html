@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+    <h1>Объявления</h1>
+
+    <!-- Кнопка для создания объявления, доступна только авторизованным пользователям -->
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('create_ad') }}" style="display:block; margin-bottom: 20px;">Создать объявление</a>
+        
+        <!-- Отображаем аватар пользователя и логин, если они авторизованы -->
+        <div class="avatar-container">
+            {% if session.get('avatar') %}
+                <img src="{{ url_for('static', filename='uploads/' + session['avatar']) }}" alt="Аватар" class="avatar-img">
+            {% else %}
+                <!-- Пустой квадрат вместо аватара -->
+                <div class="avatar-placeholder"></div>
+            {% endif %}
+            <!-- Логин пользователя -->
+            <p>{{ session.get('username') }}</p>  <!-- Здесь выводим логин -->
+        </div>
+
+        <!-- Кнопка выхода -->
+        <form action="{{ url_for('logout') }}" method="POST" style="margin-top: 20px;">
+            <button type="submit" class="logout-button">Выйти</button>
+        </form>
+    {% endif %}
+
+    {% if ads %}
+        <ul>
+            {% for ad in ads %}
+                <li>
+                    <div class="ad-container">
+                        <!-- Фотография объявления -->
+                        <div class="ad-photo">
+                            {% if ad[3] %}
+                                <img src="{{ url_for('static', filename='uploads/' + ad[3]) }}" alt="Фото" class="ad-img">
+                            {% endif %}
+                        </div>
+
+                        <div class="user-info">
+                            <h2>{{ ad[1] }}</h2> <!-- Название объявления -->
+                            <p>{{ ad[2] }}</p> <!-- Описание объявления -->
+                            <p>Автор: {{ ad[4] }}</p> <!-- Имя автора -->
+
+                            {% if ad[5] %}
+                                <p>Email: {{ ad[5] }}</p>
+                            {% endif %}
+                            
+                            <div class="edit-delete-buttons">
+                                <!-- Отображаем кнопки "Удалить" и "Редактировать" только для владельца объявления или администратора -->
+                                {% if session.get('user_id') == ad[6] or session.get('email') == 'spznsk@gmail.com' %}
+                                    <form action="{{ url_for('delete_ad', id=ad[0]) }}" method="POST" style="display:inline;">
+                                        <button type="submit" onclick="return confirm('Вы уверены, что хотите удалить это объявление?');">
+                                            Удалить
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('edit_ad', ad_id=ad[0]) }}" style="margin-left: 10px;">Редактировать</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Объявлений пока нет.</p>
+    {% endif %}
+{% endblock %}

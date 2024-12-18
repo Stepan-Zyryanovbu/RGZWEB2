@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Создание объявления{% endblock %}
+
+{% block content %}
+    <h2>Создать новое объявление</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="title">Название:</label>
+        <input type="text" id="title" name="title" required>
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" required></textarea>
+        <label for="photo">Фото:</label>
+        <input type="file" id="photo" name="photo">
+        <button type="submit">Создать объявление</button>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+{% endblock %}

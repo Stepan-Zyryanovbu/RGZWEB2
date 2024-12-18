@@ -1,0 +1,12 @@
+<h1>Добро пожаловать, {{ session['username'] }}!</h1>
+<p>Ваши объявления:</p>
+
+{% if ads %}
+    <ul>
+    {% for ad in ads %}
+        <li>{{ ad.title }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Нет объявлений</p>
+{% endif %}

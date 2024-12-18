@@ -1,0 +1,395 @@
+/* Общие стили */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+header, footer {
+    background-color: #007BFF;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+header h1, footer p {
+    margin: 0;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    margin: 20px auto;
+    max-width: 800px; /* Сделаем доску шире */
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для формы */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+form label {
+    font-weight: bold;
+}
+
+form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+form button {
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+/* Оформление для аватаров */
+img {
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    margin-right: 15px;
+}
+
+/* Контейнер для объявления и пользователя */
+.ad-container {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Новый стиль для фотографий объявлений */
+.ad-photo {
+    flex: 1;
+    max-width: 300px; /* Ограничим ширину фото */
+}
+
+.ad-img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Оформление кнопок "Редактировать" и "Удалить" */
+.edit-delete-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Оформление для списка объявлений */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+li h2 {
+    font-size: 1.8rem;
+    color: #333;
+}
+
+li p {
+    font-size: 1.1rem;
+    color: #666;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+button:hover {
+    background-color: #ff1a1a;
+}
+
+/* Новый стиль для контейнера аватара и логина */
+.avatar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar-container p {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Стиль для пустого квадратика аватара */
+.avatar-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #ccc;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+}
+/* Новый стиль для контейнера аватара и логина */
+.avatar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f0f8ff; /* Легкий фон для выделения */
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Стиль для логина */
+.avatar-container p {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #007BFF; /* Синий цвет для выделения */
+    margin: 0;
+}
+
+/* Стиль для пустого квадратика аватара */
+.avatar-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #ccc;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+}
+
+/* Стиль для аватара */
+.avatar-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+}
+
+/* Стили для аватара и логина при наведении */
+.avatar-container:hover {
+    background-color: #e1f0ff; /* Изменение фона при наведении */
+    cursor: pointer;
+}
+
+.avatar-container p:hover {
+    color: #0056b3; /* Изменение цвета текста при наведении */
+}
+/* Стили для кнопки выхода */
+.logout-button {
+    padding: 10px;
+    background-color: #FF4D4D; /* Красный цвет для кнопки выхода */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;  /* Сделаем кнопку во всю ширину */
+}
+
+.logout-button:hover {
+    background-color: #FF1A1A; /* Темнее при наведении */
+}
+/* Анимация контрастного фона */
+@keyframes backgroundAnimation {
+    0% {
+        background-color: #ff5733; /* Ярко-красный */
+    }
+    50% {
+        background-color: #33c1ff; /* Ярко-синий */
+    }
+    100% {
+        background-color: #ff5733; /* Ярко-красный */
+    }
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: #ff5733; /* Начальный яркий цвет */
+    color: #333;
+    animation: backgroundAnimation 30s infinite ease-in-out; /* Делаем анимацию медленной, 30 секунд */
+}
+/* Анимация контрастного фона */
+@keyframes backgroundAnimation {
+    0% {
+        background-color: #a8c0ff; /* Мягкий голубой */
+    }
+    50% {
+        background-color: #f0d1a6; /* Светло-желтый */
+    }
+    100% {
+        background-color: #a8c0ff; /* Мягкий голубой */
+    }
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: #a8c0ff; /* Начальный мягкий цвет */
+    color: #333;
+    animation: backgroundAnimation 30s infinite ease-in-out; /* Делаем анимацию медленной и мягкой */
+    transition: background-color 1s ease; /* Плавный переход фона */
+}
+
+/* Стиль футера */
+/* Стиль футера */
+footer {
+    background-color: rgba(0, 0, 0, 0.7); /* Полупрозрачный черный фон */
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    position: fixed; /* Фиксирует футер внизу экрана */
+    bottom: 0;
+    width: 100%; /* Чтобы футер занимал всю ширину */
+    transition: background-color 0.5s ease; /* Плавный переход для футера */
+    z-index: 9999; /* Чтобы футер был на переднем плане */
+}
+
+/* Добавление отступа для контента */
+body {
+    padding-bottom: 60px; /* Отступ снизу для контента, чтобы футер не перекрывал */
+}
+
+
+/* Стили для кнопок и переходов */
+button, .logout-button {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover, .logout-button:hover {
+    background-color: #ff1a1a; /* Темнее при наведении */
+    transform: scale(1.05); /* Легкое увеличение кнопки */
+}
+
+/* Стили для аватара и логина при наведении */
+.avatar-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f0f8ff; /* Легкий фон для выделения */
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Плавный переход */
+}
+
+.avatar-container p {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #007BFF; /* Синий цвет для выделения */
+    margin: 0;
+    transition: color 0.3s ease; /* Плавный переход цвета текста */
+}
+
+.avatar-container:hover {
+    background-color: #e1f0ff; /* Изменение фона при наведении */
+    cursor: pointer;
+    transform: scale(1.05); /* Легкое увеличение */
+}
+
+.avatar-container p:hover {
+    color: #0056b3; /* Изменение цвета текста при наведении */
+}
+
+/* Плавные переходы для ссылок */
+a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease; /* Плавный переход для цвета */
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+/* Стили для флеш-сообщений */
+.flash-messages {
+    position: fixed;
+    top: 20px; /* Расположим сообщение чуть ниже верхнего края */
+    left: 50%;
+    transform: translateX(-50%); /* Центрирование по горизонтали */
+    background-color: #28a745; /* Зеленый фон для успешных сообщений */
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999; /* Чтобы сообщение было поверх других элементов */
+    opacity: 0;
+    animation: fadeInOut 5s ease-in forwards; /* Анимация появления и исчезания */
+}
+
+/* Анимация появления и исчезания флеш-сообщений */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        top: 0;
+    }
+    10% {
+        opacity: 1;
+        top: 20px;
+    }
+    90% {
+        opacity: 1;
+        top: 20px;
+    }
+    100% {
+        opacity: 0;
+        top: 0;
+    }
