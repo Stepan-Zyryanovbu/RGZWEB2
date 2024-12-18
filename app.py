@@ -1,12 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, current_app, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from psycopg2.extras import RealDictCursor
 import psycopg2
 import os
 import uuid
+import sqlite3
+from os import path
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'секретно-секретный ключ'  # Убедитесь, что ключ безопасный
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'секретно-секретный секрет')
+app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'postgres')
 
 # Папка для хранения загруженных файлов
 UPLOAD_FOLDER = 'static/uploads'
@@ -19,7 +24,7 @@ def db_connect():
         host='127.0.0.1',
         database='rgz',
         user='admin',
-        password='5522369',  # Замените на свой пароль
+        password='5522369',  
     )
     cur = conn.cursor()
     return conn, cur
@@ -296,6 +301,36 @@ def edit_ad(ad_id):
         return redirect(url_for('home'))
 
     return render_template('edit_ad.html', ad=ad)
+
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
+    if 'user_id' not in session:
+        return redirect('/login')  # Если пользователь не авторизован
+
+    user_id = session['user_id']
+
+    conn, cur = db_connect()
+
+    try:
+        # Удаляем пользователя и связанные данные
+        cur.execute("DELETE FROM ads WHERE user_id = %s;", (user_id,))  # Удаляем объявления пользователя
+        cur.execute("DELETE FROM users WHERE id = %s;", (user_id,))    # Удаляем сам аккаунт
+        conn.commit()
+        db_close(conn, cur)
+
+        # Завершаем сессию
+        session.pop("user_id", None)
+        session.pop("username", None)
+        session.pop("email", None)
+
+        flash("Ваш аккаунт был успешно удалён.", "success")
+        return redirect('/')
+    except Exception as e:
+        conn.rollback()
+        db_close(conn, cur)
+        flash(f"Произошла ошибка: {str(e)}", "danger")
+        return redirect('/profile')
+
 
 if __name__ == "__main__":
     app.run(debug=True)

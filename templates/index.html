@@ -25,6 +25,9 @@
         <form action="{{ url_for('logout') }}" method="POST" style="margin-top: 20px;">
             <button type="submit" class="logout-button">Выйти</button>
         </form>
+        <form action="/delete_account" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить аккаунт? Это действие необратимо!');">
+            <button type="submit" class="btn btn-danger">Удалить аккаунт</button>
+        </form>        
     {% endif %}
 
     {% if ads %}
@@ -68,3 +71,4 @@
         <p>Объявлений пока нет.</p>
     {% endif %}
 {% endblock %}
+
