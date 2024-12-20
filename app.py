@@ -71,7 +71,7 @@ def home():
             cur.execute("SELECT avatar FROM users WHERE id = ?;", (session.get('user_id'),))
         user = cur.fetchone()
         db_close(conn, cur)
-        
+
         if user and user['avatar']:  # Проверка через ключ 'avatar'
             avatar = user['avatar']  # Если аватар есть, добавляем его в сессию
 
@@ -157,12 +157,19 @@ def register():
             return render_template("register.html")
 
         password_hash = generate_password_hash(password)
-
-        if avatar_filename:
-            cur.execute("INSERT INTO users (login, password, name, email, avatar) VALUES (%s, %s, %s, %s, %s);", 
+        if current_app.config['DB_TYPE'] == 'postgres':
+            if avatar_filename:
+                cur.execute("INSERT INTO users (login, password, name, email, avatar) VALUES (%s, %s, %s, %s, %s);", 
                         (username, password_hash, name, email, avatar_filename))
+            else:
+                cur.execute("INSERT INTO users (login, password, name, email) VALUES (%s, %s, %s, %s);", 
+                        (username, password_hash, name, email))
         else:
-            cur.execute("INSERT INTO users (login, password, name, email) VALUES (?, ?, ?, ?);", 
+            if avatar_filename:
+                cur.execute("INSERT INTO users (login, password, name, email, avatar) VALUES (?, ?, ?, ?, ?);", 
+                        (username, password_hash, name, email, avatar_filename))
+            else:
+                cur.execute("INSERT INTO users (login, password, name, email) VALUES (?, ?, ?, ?);", 
                         (username, password_hash, name, email))
 
         db_close(conn, cur)
