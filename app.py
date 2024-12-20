@@ -20,19 +20,28 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Функция для подключения к базе данных
 def db_connect():
-    conn = psycopg2.connect(
-        host='127.0.0.1',
-        database='rgz',
-        user='admin',
-        password='5522369',  
-    )
-    cur = conn.cursor()
+#   Устанавливает подключение к базе данных.
+    
+    if current_app.config['DB_TYPE'] == 'postgres':
+        conn = psycopg2.connect(
+            host='127.0.0.1',
+            database='rgz',
+            user='admin',
+            password='5522369'
+        )
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+    else:
+        dir_path = path.dirname(path.realpath(__file__))
+        db_path = path.join(dir_path, "database.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
     return conn, cur
 
-# Функция для закрытия соединения с базой
 def db_close(conn, cur):
-    cur.close()
     conn.commit()
+    cur.close()
     conn.close()
 
 # Функция для проверки разрешенных типов файлов
@@ -56,32 +65,53 @@ def home():
     if session.get('user_id'):
         # Получаем аватар пользователя из базы данных
         conn, cur = db_connect()
-        cur.execute("SELECT avatar FROM users WHERE id = %s;", (session.get('user_id'),))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT avatar FROM users WHERE id = %s;", (session.get('user_id'),))
+        else:
+            cur.execute("SELECT avatar FROM users WHERE id = ?;", (session.get('user_id'),))
         user = cur.fetchone()
         db_close(conn, cur)
         
-        if user and user[0]:
-            avatar = user[0]  # Если аватар есть, добавляем его в сессию
+        if user and user['avatar']:  # Проверка через ключ 'avatar'
+            avatar = user['avatar']  # Если аватар есть, добавляем его в сессию
 
     session['avatar'] = avatar  # Сохраняем аватар в сессию
 
     conn, cur = db_connect()
 
     # Получаем все объявления и добавляем поле user_id
-    cur.execute(""" 
-        SELECT ads.id, ads.title, ads.description, ads.photo, users.name, users.email, ads.user_id
-        FROM ads
-        JOIN users ON ads.user_id = users.id;
-    """)
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute(""" 
+            SELECT ads.id, ads.title, ads.description, ads.photo, users.name, users.email, ads.user_id
+            FROM ads
+            JOIN users ON ads.user_id = users.id;
+        """)
+    else:
+        cur.execute(""" 
+            SELECT ads.id, ads.title, ads.description, ads.photo, users.name, users.email, ads.user_id
+            FROM ads
+            JOIN users ON ads.user_id = users.id;
+        """)
 
     ads = cur.fetchall()
     db_close(conn, cur)
 
-    # Скрыть email для неавторизованных пользователей
     if not session.get('user_id'):
-        ads = [(ad[0], ad[1], ad[2], ad[3], ad[4], None, ad[6]) for ad in ads]
+        # Если пользователь не авторизован, скрываем email
+        ads = [
+            (ad['id'], ad['title'], ad['description'], ad['photo'], ad['name'], None, ad['user_id'])
+            for ad in ads
+        ]
+    else:
+        # Для авторизованных пользователей, в том числе email
+        ads = [
+            (ad['id'], ad['title'], ad['description'], ad['photo'], ad['name'], ad['email'], ad['user_id'])
+            for ad in ads
+        ]
 
-    return render_template("index.html", user=username, ads=ads)
+    return render_template("index.html", user=username, avatar=avatar, ads=ads)
+
+
 
 
 
@@ -108,13 +138,19 @@ def register():
 
         conn, cur = db_connect()
 
-        cur.execute("SELECT * FROM users WHERE login=%s;", (username,))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT * FROM users WHERE login=%s;", (username,))
+        else:
+            cur.execute("SELECT * FROM users WHERE login=?;", (username,))
         if cur.fetchone():
             db_close(conn, cur)
             flash("Пользователь с таким именем уже существует.", "danger")
             return render_template("register.html")
 
-        cur.execute("SELECT * FROM users WHERE email=%s;", (email,))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT * FROM users WHERE email=%s;", (email,))
+        else:
+            cur.execute("SELECT * FROM users WHERE email=?;", (email,))
         if cur.fetchone():
             db_close(conn, cur)
             flash("Пользователь с таким email уже существует.", "danger")
@@ -126,7 +162,7 @@ def register():
             cur.execute("INSERT INTO users (login, password, name, email, avatar) VALUES (%s, %s, %s, %s, %s);", 
                         (username, password_hash, name, email, avatar_filename))
         else:
-            cur.execute("INSERT INTO users (login, password, name, email) VALUES (%s, %s, %s, %s);", 
+            cur.execute("INSERT INTO users (login, password, name, email) VALUES (?, ?, ?, ?);", 
                         (username, password_hash, name, email))
 
         db_close(conn, cur)
@@ -144,20 +180,24 @@ def login():
         password = request.form.get("password")
 
         conn, cur = db_connect()
-        cur.execute("SELECT id, password, email FROM users WHERE login = %s", (username,))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("SELECT id, password, email FROM users WHERE login = %s", (username,))
+        else:
+            cur.execute("SELECT id, password, email FROM users WHERE login = ?", (username,))
         user = cur.fetchone()
         db_close(conn, cur)
 
-        if user and check_password_hash(user[1], password):
-            session["user_id"] = user[0]
-            session["username"] = username
-            session["email"] = user[2]  # Сохраняем email в сессии
-            flash("Добро пожаловать!", "success")
-            print(f"User session: {session}")  # Отладочный вывод
-            return redirect(url_for("home"))
+        if user:
+            if check_password_hash(user['password'] if isinstance(user, dict) else user[1], password):
+                session["user_id"] = user['id'] if isinstance(user, dict) else user[0]
+                session["username"] = username
+                session["email"] = user['email'] if isinstance(user, dict) else user[2]
+                flash("Добро пожаловать!", "success")
+                return redirect(url_for("home"))
+            else:
+                flash("Неверное имя пользователя или пароль", "error")
         else:
-            flash("Неверное имя пользователя или пароль", "error")
-            return render_template("login.html")
+            flash("Пользователь не найден", "error")
 
     return render_template("login.html")
 
@@ -194,8 +234,14 @@ def create_ad():
         conn, cur = db_connect()
 
         # Вставляем объявление в базу, используя правильный user_id
-        cur.execute(
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute(
             "INSERT INTO ads (user_id, title, description, photo) VALUES (%s, %s, %s, %s);",
+            (user_id, title, description, photo_filename)
+        )
+        else:
+            cur.execute(
+            "INSERT INTO ads (user_id, title, description, photo) VALUES (?, ?, ?, ?);",
             (user_id, title, description, photo_filename)
         )
         db_close(conn, cur)
@@ -206,7 +252,6 @@ def create_ad():
     return render_template("create_ad.html")
 
 
-
 @app.route("/ad/<int:id>")
 def view_ad(id):
     if not session.get("user_id"):
@@ -214,7 +259,10 @@ def view_ad(id):
         return redirect(url_for("login"))
 
     conn, cur = db_connect()
-    cur.execute("SELECT * FROM ads WHERE id = %s;", (id,))
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT * FROM ads WHERE id = %s;", (id,))
+    else:
+        cur.execute("SELECT * FROM ads WHERE id = ?;", (id,))
     ad = cur.fetchone()
     db_close(conn, cur)
 
@@ -232,15 +280,21 @@ def delete_ad(id):
         return redirect(url_for("login"))
 
     conn, cur = db_connect()
-    cur.execute("SELECT user_id FROM ads WHERE id = %s;", (id,))
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT user_id FROM ads WHERE id = %s;", (id,))
+    else:
+        cur.execute("SELECT user_id FROM ads WHERE id = ?;", (id,))
     ad = cur.fetchone()
 
     if ad:
         # Логирование для проверки
         print(f"Trying to delete ad {id} by user {session.get('user_id')} (admin: {is_admin()})")
 
-        if ad[0] == session.get('user_id') or ('user_id' in session and is_admin()):
-            cur.execute("DELETE FROM ads WHERE id = %s;", (id,))
+        if ad['user_id'] == session.get('user_id') or ('user_id' in session and is_admin()):
+            if current_app.config['DB_TYPE'] == 'postgres':
+                cur.execute("DELETE FROM ads WHERE id = %s;", (id,))
+            else:
+                cur.execute("DELETE FROM ads WHERE id = ?;", (id,))
             conn.commit()
             flash("Объявление успешно удалено!", "success")
         else:
@@ -252,6 +306,7 @@ def delete_ad(id):
     return redirect(url_for("home"))
 
 
+
 @app.route('/ads/edit/<int:ad_id>', methods=['GET', 'POST'])
 def edit_ad(ad_id):
     if 'user_id' not in session:
@@ -259,7 +314,10 @@ def edit_ad(ad_id):
         return redirect(url_for('login'))
 
     conn, cur = db_connect()
-    cur.execute("SELECT user_id, title, description, photo FROM ads WHERE id = %s;", (ad_id,))
+    if current_app.config['DB_TYPE'] == 'postgres':
+        cur.execute("SELECT user_id, title, description, photo FROM ads WHERE id = %s;", (ad_id,))
+    else:
+        cur.execute("SELECT user_id, title, description, photo FROM ads WHERE id = ?;", (ad_id,))
     ad = cur.fetchone()
     db_close(conn, cur)
 
@@ -267,7 +325,7 @@ def edit_ad(ad_id):
         flash('Объявление не найдено.', 'error')
         return redirect(url_for('home'))
 
-    ad_user_id = ad[0]  # Получаем user_id из объявления
+    ad_user_id = ad['user_id']  # Получаем user_id из объявления (используем ключ)
     if ad_user_id != session['user_id'] and not is_admin():  # Проверяем владельца
         flash('У вас нет прав на редактирование этого объявления.', 'error')
         return redirect(url_for('home'))
@@ -313,8 +371,15 @@ def delete_account():
 
     try:
         # Удаляем пользователя и связанные данные
-        cur.execute("DELETE FROM ads WHERE user_id = %s;", (user_id,))  # Удаляем объявления пользователя
-        cur.execute("DELETE FROM users WHERE id = %s;", (user_id,))    # Удаляем сам аккаунт
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("DELETE FROM ads WHERE user_id = %s;", (user_id,))  # Удаляем объявления пользователя
+        else:
+            cur.execute("DELETE FROM ads WHERE user_id = ?;", (user_id,))
+
+        if current_app.config['DB_TYPE'] == 'postgres':
+            cur.execute("DELETE FROM users WHERE id = %s;", (user_id,))
+        else:
+            cur.execute("DELETE FROM users WHERE id = ?;", (user_id,))    # Удаляем сам аккаунт
         conn.commit()
         db_close(conn, cur)
 
