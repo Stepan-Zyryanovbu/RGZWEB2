@@ -348,19 +348,33 @@ def edit_ad(ad_id):
             photo.save(os.path.join(app.config['UPLOAD_FOLDER'], photo_filename))
 
         conn, cur = db_connect()
-        if photo_filename:
-            cur.execute("""
-                UPDATE ads
-                SET title = %s, description = %s, photo = %s
-                WHERE id = %s;
-            """, (title, description, photo_filename, ad_id))
+        if current_app.config['DB_TYPE'] == 'postgres':
+            if photo_filename:
+                cur.execute("""
+                    UPDATE ads
+                    SET title = %s, description = %s, photo = %s
+                    WHERE id = %s;
+                """, (title, description, photo_filename, ad_id))
+            else:
+                cur.execute("""
+                    UPDATE ads
+                    SET title = %s, description = %s
+                    WHERE id = %s;
+                """, (title, description, ad_id))
         else:
-            cur.execute("""
-                UPDATE ads
-                SET title = %s, description = %s
-                WHERE id = %s;
-            """, (title, description, ad_id))
-        db_close(conn, cur)
+            if photo_filename:
+                cur.execute("""
+                    UPDATE ads
+                    SET title = ?, description = ?, photo = ?
+                    WHERE id = ?;
+                """, (title, description, photo_filename, ad_id))
+            else:
+                cur.execute("""
+                    UPDATE ads
+                    SET title = ?, description = ?
+                    WHERE id = ?;
+                """, (title, description, ad_id))
+            db_close(conn, cur)
 
         flash('Объявление обновлено успешно.', 'success')
         return redirect(url_for('home'))
